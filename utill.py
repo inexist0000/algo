@@ -11,7 +11,7 @@ DATA = ROOT / 'data' / 'graph.json'
 
 def new_graph():
     return {'version': 1, 'coordinate_system': 'image_pixels_top_left',
-            'weight_unit': 'seconds', 'image': None, 'nodes': [], 'edges': []}
+            'directed': False, 'weight_unit': 'seconds', 'image': None, 'nodes': [], 'edges': []}
 
 
 def number(value):
@@ -81,7 +81,7 @@ class Editor:
         self.items = tk.Listbox(side, height=12, exportselection=False, bg='#151515', fg='#eeeeee', selectbackground='#375b85')
         self.items.pack(fill='both', expand=True)
         self.items.bind('<<ListboxSelect>>', self.list_select)
-        ttk.Label(side, text='연결은 방향이 있습니다.\n왕복은 반대 방향도 추가하세요.\n혼잡 시간 비용 = 기본 시간 + 지연', wraplength=260).pack(anchor='w', pady=12)
+        ttk.Label(side, text='연결은 양방향입니다.\n같은 두 노드를 다시 연결하면\n별도의 경로를 추가할 수 있습니다.', wraplength=260).pack(anchor='w', pady=12)
         self.status = tk.StringVar(value='assets/map.png 자동 로드 · 노드를 클릭해 편집하세요.')
         ttk.Label(root, textvariable=self.status, padding=8).pack(fill='x')
         self.pointer = tk.StringVar(value='마우스 지도 좌표: — (이미지 픽셀)')
@@ -111,7 +111,7 @@ class Editor:
 
     def reset_start(self):
         self.start = None
-        self.status.set('노드 추가: 빈 곳 클릭 / 구간 연결: 출발 노드, 도착 노드 순서로 클릭')
+        self.status.set('노드 추가: 빈 곳 클릭 / 구간 연결: 연결할 두 노드를 차례로 클릭')
         self.draw()
 
     def load_image(self):
@@ -126,7 +126,7 @@ class Editor:
         self.graph['image'] = {'path': 'assets/map.png', 'width': photo.width(), 'height': photo.height()}
 
     def node_at(self, x, y):
-        return next((n for n in reversed(self.graph['nodes']) if math.hypot(n['x']-x, n['y']-y) <= 12/self.zoom), None)
+        return next((n for n in reversed(self.graph['nodes']) if math.hypot(n['x']-x, n['y']-y) <= 8/self.zoom), None)
 
     def click(self, event):
         self.canvas.focus_set()
@@ -149,7 +149,7 @@ class Editor:
                 self.start = node['id']
                 self.status.set(f"출발: {node['name']} → 도착 노드를 클릭하세요.")
             elif self.start != node['id']:
-                edge = next((e for e in self.graph['edges'] if e['source'] == self.start and e['target'] == node['id']), None)
+                edge = None
                 if edge is None:
                     origin = next(n for n in self.graph['nodes'] if n['id'] == self.start)
                     distance = round(math.hypot(node['x']-origin['x'], node['y']-origin['y']), 3)
@@ -246,31 +246,40 @@ class Editor:
         nodes = {n['id']: n for n in self.graph['nodes']}
         self.rows = []
         self.items.delete(0, 'end')
+        groups = {}
+        for edge in self.graph['edges']:
+            key = tuple(sorted((edge['source'], edge['target'])))
+            groups.setdefault(key, []).append(edge)
         for i, edge in enumerate(self.graph['edges']):
             a, b = nodes[edge['source']], nodes[edge['target']]
             color = '#ef7c00' if self.selected and self.selected[1] is edge else '#3465a4'
-            # Offset directed edges so the reverse direction stays separately clickable.
+            # Use a canonical orientation for parallel undirected curves.
+            key = tuple(sorted((edge['source'], edge['target'])))
+            a, b = nodes[key[0]], nodes[key[1]]
+            group = groups[key]
+            slot = next(j for j, candidate in enumerate(group) if candidate is edge)
+            offset = (slot-(len(group)-1)/2)*38
             dx, dy = b['x']-a['x'], b['y']-a['y']
             length = max(1, math.hypot(dx, dy))
-            ox, oy = -dy/length*7, dx/length*7
-            coords = (a['x']+ox, a['y']+oy, b['x']+ox, b['y']+oy)
-            c.create_line(*coords, fill=color, width=3, arrow='last', tags=(f'edge:{i}',))
-            c.create_text((a['x']+b['x'])/2+ox*2, (a['y']+b['y'])/2+oy*2,
-                          text=f"{edge['distance_px']:g}px", fill=color,
+            mx, my = (a['x']+b['x'])/2, (a['y']+b['y'])/2
+            cx, cy = mx-dy/length*offset, my+dx/length*offset
+            c.create_line(a['x'], a['y'], cx, cy, b['x'], b['y'],
+                          smooth=True, splinesteps=32, fill=color, width=2,
                           tags=(f'edge:{i}',))
         for node in self.graph['nodes']:
             x, y = node['x'], node['y']
             active = (self.selected and self.selected[1] is node) or self.start == node['id']
-            c.create_oval(x-7, y-7, x+7, y+7, fill='#ef7c00' if active else '#d83b45', outline='white', width=2)
+            c.create_oval(x-4, y-4, x+4, y+4, fill='#ef7c00' if active else '#d83b45', outline='white', width=2)
             self.rows.append(('node', node))
             self.items.insert('end', f"● {node['name']} [{node['id']}]")
         for edge in self.graph['edges']:
             self.rows.append(('edge', edge))
-            self.items.insert('end', f"→ {nodes[edge['source']]['name']} → {nodes[edge['target']]['name']}")
+            self.items.insert('end', f"↔ {nodes[edge['source']]['name']} — {nodes[edge['target']]['name']}")
         c.scale('all', 0, 0, self.zoom, self.zoom)
         self.root.title(('• ' if self.dirty else '') + 'PBL 1 · 지도 그래프 편집기')
 
     def refresh_distances(self):
+        self.graph['directed'] = False
         nodes = {n['id']: n for n in self.graph['nodes']}
         for edge in self.graph['edges']:
             a, b = nodes[edge['source']], nodes[edge['target']]
