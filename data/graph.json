@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "coordinate_system": "image_pixels_top_left",
+  "weight_unit": "seconds",
+  "image": {
+    "path": "assets/map.png",
+    "width": 614,
+    "height": 779
+  },
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "지곡회관",
+      "x": 268.0,
+      "y": 201.0,
+      "elevation_m": null
+    },
+    {
+      "id": "n2",
+      "name": "학생회관정문",
+      "x": 176.0,
+      "y": 424.0,
+      "elevation_m": null
+    },
+    {
+      "id": "n3",
+      "name": "78계단아래",
+      "x": 230.0,
+      "y": 244.0,
+      "elevation_m": null
+    },
+    {
+      "id": "n4",
+      "name": "78계단위",
+      "x": 213.0,
+      "y": 290.0,
+      "elevation_m": null
+    },
+    {
+      "id": "n5",
+      "name": "국제관교차로",
+      "x": 213.0,
+      "y": 356.0,
+      "elevation_m": null
+    },
+    {
+      "id": "n6",
+      "name": "청암5층입구",
+      "x": 424.0,
+      "y": 427.0,
+      "elevation_m": null
+    },
+    {
+      "id": "n7",
+      "name": "청암산책로",
+      "x": 380.0,
+      "y": 436.0,
+      "elevation_m": null
+    },
+    {
+      "id": "n8",
+      "name": "체인지업그라운드통로",
+      "x": 362.0,
+      "y": 456.0,
+      "elevation_m": null
+    },
+    {
+      "id": "n9",
+      "name": "체인지업그라운드뒷문",
+      "x": 325.0,
+      "y": 452.0,
+      "elevation_m": null
+    },
+    {
+      "id": "n10",
+      "name": "체인지업그라운드정문",
+      "x": 362.0,
+      "y": 498.0,
+      "elevation_m": null
+    },
+    {
+      "id": "n11",
+      "name": "무은재기념관정문",
+      "x": 253.0,
+      "y": 492.0,
+      "elevation_m": null
+    },
+    {
+      "id": "n12",
+      "name": "무은재기념관우측문",
+      "x": 282.0,
+      "y": 488.0,
+      "elevation_m": 0.0
+    },
+    {
+      "id": "n13",
+      "name": "무은재기념관 좌측문",
+      "x": 263.0,
+      "y": 468.0,
+      "elevation_m": 0.0
+    },
+    {
+      "id": "n14",
+      "name": "대강당",
+      "x": 223.0,
+      "y": 517.0,
+      "elevation_m": 0.0
+    },
+    {
+      "id": "n15",
+      "name": "학생회관 측문",
+      "x": 193.0,
+      "y": 395.0,
+      "elevation_m": 0.0
+    },
+    {
+      "id": "n16",
+      "name": "청암로샛길",
+      "x": 355.0,
+      "y": 256.0,
+      "elevation_m": 0.0
+    },
+    {
+      "id": "n17",
+      "name": "청암로",
+      "x": 352.0,
+      "y": 411.0,
+      "elevation_m": 0.0
+    }
+  ],
+  "edges": []
+}
