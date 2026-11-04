@@ -28,6 +28,8 @@ class Editor:
         self.selected = None
         self.start = None
         self.image = None
+        self.zoom = 1.0
+        self.display_image = None
         self.dirty = False
         self.mode = tk.StringVar(value='select')
         root.title('PBL 1 · 지도 그래프 편집기')
@@ -47,6 +49,8 @@ class Editor:
         for label, mode in [('선택 / 위치 이동', 'select'), ('노드 추가', 'add'), ('구간 연결', 'edge')]:
             ttk.Radiobutton(bar, text=label, variable=self.mode, value=mode,
                             command=self.reset_start).pack(side='left', padx=8)
+        ttk.Button(bar, text='확대 +', command=lambda: self.change_zoom(1)).pack(side='left')
+        ttk.Button(bar, text='축소 −', command=lambda: self.change_zoom(-1)).pack(side='left')
         ttk.Label(bar, text='Ctrl+S 저장 · Delete 선택 항목 삭제').pack(side='right')
         body = ttk.Frame(root)
         body.pack(fill='both', expand=True)
@@ -66,7 +70,7 @@ class Editor:
         ttk.Label(side, text='선택 항목', font=('', 13, 'bold')).pack(anchor='w')
         self.fields = {}
         for key, title in [('name', '노드 이름'), ('x', 'X 위치 (px)'), ('y', 'Y 위치 (px)'), ('elevation_m', '높이 / 고도 (m)'),
-                           ('weight', '기본 통과 시간 (초)'), ('peak_delay', '혼잡 추가 지연 (초)')]:
+                           ('distance_px', '직선 거리 (px, 자동)'), ('weight', '가중치 (단위는 아래 상태 표시)'), ('peak_delay', '혼잡 추가 지연 (초)')]:
             ttk.Label(side, text=title).pack(anchor='w', pady=(10, 2))
             field = ttk.Entry(side, width=28)
             field.pack(fill='x')
@@ -82,6 +86,7 @@ class Editor:
         ttk.Label(root, textvariable=self.status, padding=8).pack(fill='x')
         self.pointer = tk.StringVar(value='마우스 지도 좌표: — (이미지 픽셀)')
         ttk.Label(root, textvariable=self.pointer, padding=8).pack(fill='x')
+        self.canvas.bind('<MouseWheel>', lambda event: self.change_zoom(1 if event.delta > 0 else -1, event))
         self.canvas.bind('<Motion>', self.track_mouse)
         self.canvas.bind('<Leave>', lambda event: self.pointer.set('마우스 지도 좌표: —'))
         self.canvas.bind('<Button-1>', self.click)
@@ -101,7 +106,7 @@ class Editor:
         self.draw()
 
     def track_mouse(self, event):
-        x, y = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+        x, y = self.canvas.canvasx(event.x)/self.zoom, self.canvas.canvasy(event.y)/self.zoom
         self.pointer.set(f'마우스 지도 좌표: X={x:.1f}, Y={y:.1f} px | 높이는 직접 입력 (m)')
 
     def reset_start(self):
@@ -113,12 +118,7 @@ class Editor:
         path = ROOT / 'assets' / 'map.png'
         if not path.exists():
             raise FileNotFoundError(f'지도 파일을 넣어주세요: {path}')
-        try:
-            from PIL import Image, ImageTk
-            with Image.open(path) as source:
-                photo = ImageTk.PhotoImage(source)
-        except ImportError:
-            photo = tk.PhotoImage(file=str(path))
+        photo = tk.PhotoImage(file=str(path))
         info = self.graph.get('image')
         if info and self.graph['nodes'] and (photo.width(), photo.height()) != (info['width'], info['height']):
             raise ValueError('map.png 크기가 기존 노드의 좌표 기준과 다릅니다. 기존 크기의 지도를 사용하세요.')
@@ -126,11 +126,11 @@ class Editor:
         self.graph['image'] = {'path': 'assets/map.png', 'width': photo.width(), 'height': photo.height()}
 
     def node_at(self, x, y):
-        return next((n for n in reversed(self.graph['nodes']) if math.hypot(n['x']-x, n['y']-y) <= 12), None)
+        return next((n for n in reversed(self.graph['nodes']) if math.hypot(n['x']-x, n['y']-y) <= 12/self.zoom), None)
 
     def click(self, event):
         self.canvas.focus_set()
-        x, y = self.canvas.canvasx(event.x), self.canvas.canvasy(event.y)
+        x, y = self.canvas.canvasx(event.x)/self.zoom, self.canvas.canvasy(event.y)/self.zoom
         node = self.node_at(x, y)
         if self.mode.get() == 'add' and not node:
             if not self.image or not (0 <= x < self.image.width() and 0 <= y < self.image.height()):
@@ -151,10 +151,9 @@ class Editor:
             elif self.start != node['id']:
                 edge = next((e for e in self.graph['edges'] if e['source'] == self.start and e['target'] == node['id']), None)
                 if edge is None:
-                    cost = simpledialog.askfloat('구간 연결', '기본 통과 시간 (초):', minvalue=0, parent=self.root)
-                    if cost is None or not math.isfinite(cost):
-                        return
-                    edge = {'source': self.start, 'target': node['id'], 'weight': cost, 'peak_delay': 0.0}
+                    origin = next(n for n in self.graph['nodes'] if n['id'] == self.start)
+                    distance = round(math.hypot(node['x']-origin['x'], node['y']-origin['y']), 3)
+                    edge = {'source': self.start, 'target': node['id'], 'distance_px': distance, 'weight': distance, 'weight_unit': 'pixels', 'peak_delay': 0.0}
                     self.graph['edges'].append(edge)
                     self.dirty = True
                 self.start = None
@@ -164,7 +163,8 @@ class Editor:
         elif node:
             self.select('node', node)
         else:
-            hits = self.canvas.find_overlapping(x-4, y-4, x+4, y+4)
+            cx, cy = x*self.zoom, y*self.zoom
+            hits = self.canvas.find_overlapping(cx-4, cy-4, cx+4, cy+4)
             for item in reversed(hits):
                 for tag in self.canvas.gettags(item):
                     if tag.startswith('edge:'):
@@ -177,14 +177,16 @@ class Editor:
             field.delete(0, 'end')
             if key in obj and obj[key] is not None:
                 field.insert(0, str(obj[key]))
+        if kind == 'edge':
+            self.status.set('가중치 단위: ' + obj.get('weight_unit', self.graph.get('weight_unit', 'seconds')))
         self.draw()
 
     def drag(self, event):
         if self.mode.get() != 'select' or not self.selected or self.selected[0] != 'node':
             return
         node = self.selected[1]
-        node['x'] = round(max(0, min(self.image.width()-1, self.canvas.canvasx(event.x))), 2)
-        node['y'] = round(max(0, min(self.image.height()-1, self.canvas.canvasy(event.y))), 2)
+        node['x'] = round(max(0, min(self.image.width()-1, self.canvas.canvasx(event.x)/self.zoom)), 2)
+        node['y'] = round(max(0, min(self.image.height()-1, self.canvas.canvasy(event.y)/self.zoom)), 2)
         self.dirty = True
         self.select('node', node)
 
@@ -233,11 +235,12 @@ class Editor:
             self.select(*self.rows[indices[0]])
 
     def draw(self):
+        self.refresh_distances()
         c = self.canvas
         c.delete('all')
         if self.image:
-            c.create_image(0, 0, image=self.image, anchor='nw')
-            c.configure(scrollregion=(0, 0, self.image.width(), self.image.height()))
+            c.create_image(0, 0, image=self.display_image or self.image, anchor='nw')
+            c.configure(scrollregion=(0, 0, self.image.width()*self.zoom, self.image.height()*self.zoom))
         else:
             c.create_text(300, 180, text='assets/map.png 확인 → 노드 추가 → 구간 연결 → 저장', fill='#eeeeee', font=('', 16))
         nodes = {n['id']: n for n in self.graph['nodes']}
@@ -253,22 +256,50 @@ class Editor:
             coords = (a['x']+ox, a['y']+oy, b['x']+ox, b['y']+oy)
             c.create_line(*coords, fill=color, width=3, arrow='last', tags=(f'edge:{i}',))
             c.create_text((a['x']+b['x'])/2+ox*2, (a['y']+b['y'])/2+oy*2,
-                          text=f"{edge['weight']:g}s (+{edge['peak_delay']:g})", fill=color,
+                          text=f"{edge['distance_px']:g}px", fill=color,
                           tags=(f'edge:{i}',))
         for node in self.graph['nodes']:
             x, y = node['x'], node['y']
             active = (self.selected and self.selected[1] is node) or self.start == node['id']
             c.create_oval(x-7, y-7, x+7, y+7, fill='#ef7c00' if active else '#d83b45', outline='white', width=2)
-            c.create_text(x+11, y-12, text=node['name'], anchor='w', fill='#ffffff', font=('', 11, 'bold'))
             self.rows.append(('node', node))
             self.items.insert('end', f"● {node['name']} [{node['id']}]")
         for edge in self.graph['edges']:
             self.rows.append(('edge', edge))
             self.items.insert('end', f"→ {nodes[edge['source']]['name']} → {nodes[edge['target']]['name']}")
+        c.scale('all', 0, 0, self.zoom, self.zoom)
         self.root.title(('• ' if self.dirty else '') + 'PBL 1 · 지도 그래프 편집기')
+
+    def refresh_distances(self):
+        nodes = {n['id']: n for n in self.graph['nodes']}
+        for edge in self.graph['edges']:
+            a, b = nodes[edge['source']], nodes[edge['target']]
+            edge['distance_px'] = round(math.hypot(b['x']-a['x'], b['y']-a['y']), 3)
+            if edge.get('weight_unit') == 'pixels':
+                edge['weight'] = edge['distance_px']
+
+    def change_zoom(self, direction, event=None):
+        if not self.image:
+            return
+        levels = [0.5, 1.0, 2.0, 3.0, 4.0]
+        index = levels.index(self.zoom)
+        new = levels[max(0, min(len(levels)-1, index+direction))]
+        if new == self.zoom:
+            return
+        px = event.x if event else self.canvas.winfo_width()/2
+        py = event.y if event else self.canvas.winfo_height()/2
+        x = self.canvas.canvasx(px)/self.zoom
+        y = self.canvas.canvasy(py)/self.zoom
+        self.zoom = new
+        self.display_image = self.image.subsample(2) if new == 0.5 else self.image.zoom(int(new))
+        self.draw()
+        self.canvas.xview_moveto(max(0, (x*new-px)/(self.image.width()*new)))
+        self.canvas.yview_moveto(max(0, (y*new-py)/(self.image.height()*new)))
+        self.status.set(f'확대 {new*100:g}% · 새 구간은 픽셀 거리를 가중치로 저장합니다.')
 
     def save(self):
         try:
+            self.refresh_distances()
             DATA.parent.mkdir(parents=True, exist_ok=True)
             temp = DATA.with_suffix('.tmp')
             temp.write_text(json.dumps(self.graph, ensure_ascii=False, indent=2, allow_nan=False), encoding='utf-8')
@@ -291,3 +322,4 @@ class Editor:
 
 if __name__ == '__main__':
     Editor(tk.Tk()).root.mainloop()
+
