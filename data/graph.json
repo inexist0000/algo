@@ -210,14 +210,358 @@
       "x": 320.0,
       "y": 273.0,
       "elevation_m": 0.0
+    },
+    {
+      "id": "n30",
+      "name": "커센",
+      "x": 283.33,
+      "y": 115.0,
+      "elevation_m": 0.0
+    },
+    {
+      "id": "n31",
+      "name": "무은재기념관",
+      "x": 268.5,
+      "y": 481.0,
+      "elevation_m": 0.0
+    },
+    {
+      "id": "n32",
+      "name": "국제관_체그",
+      "x": 242.0,
+      "y": 390.0,
+      "elevation_m": 0.0
     }
   ],
   "edges": [
     {
       "source": "n21",
       "target": "n1",
-      "weight": 1.0,
+      "weight": 16.125,
+      "peak_delay": 0.0,
+      "weight_unit": "pixels",
+      "distance_px": 16.125
+    },
+    {
+      "source": "n1",
+      "target": "n18",
+      "distance_px": 17.464,
+      "weight": 17.464,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n1",
+      "target": "n20",
+      "distance_px": 19.799,
+      "weight": 19.799,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n19",
+      "target": "n1",
+      "distance_px": 28.32,
+      "weight": 28.32,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n21",
+      "target": "n19",
+      "distance_px": 21.587,
+      "weight": 21.587,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n16",
+      "target": "n29",
+      "distance_px": 38.91,
+      "weight": 38.91,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n20",
+      "target": "n16",
+      "distance_px": 83.726,
+      "weight": 83.726,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n29",
+      "target": "n4",
+      "distance_px": 61.074,
+      "weight": 61.074,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n3",
+      "target": "n4",
+      "distance_px": 43.186,
+      "weight": 43.186,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n3",
+      "target": "n5",
+      "distance_px": 113.283,
+      "weight": 113.283,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n3",
+      "target": "n5",
+      "distance_px": 113.283,
+      "weight": 113.283,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n15",
+      "target": "n5",
+      "distance_px": 43.829,
+      "weight": 43.829,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n24",
+      "target": "n15",
+      "distance_px": 25.554,
+      "weight": 25.554,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n2",
+      "target": "n24",
+      "distance_px": 16.763,
+      "weight": 16.763,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n25",
+      "target": "n23",
+      "distance_px": 26.907,
+      "weight": 26.907,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n22",
+      "target": "n25",
+      "distance_px": 24.083,
+      "weight": 24.083,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n23",
+      "target": "n11",
+      "distance_px": 38.419,
+      "weight": 38.419,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n23",
+      "target": "n11",
+      "distance_px": 38.419,
+      "weight": 38.419,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n22",
+      "target": "n13",
+      "distance_px": 34.059,
+      "weight": 34.059,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n23",
+      "target": "n2",
+      "distance_px": 64.382,
+      "weight": 64.382,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n14",
+      "target": "n11",
+      "distance_px": 39.051,
+      "weight": 39.051,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n23",
+      "target": "n14",
+      "distance_px": 49.0,
+      "weight": 49.0,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n26",
+      "target": "n12",
+      "distance_px": 32.45,
+      "weight": 32.45,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n13",
+      "target": "n26",
+      "distance_px": 37.656,
+      "weight": 37.656,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n9",
+      "target": "n26",
+      "distance_px": 26.571,
+      "weight": 26.571,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n9",
+      "target": "n27",
+      "distance_px": 29.069,
+      "weight": 29.069,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n27",
+      "target": "n8",
+      "distance_px": 25.456,
+      "weight": 25.456,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n27",
+      "target": "n10",
+      "distance_px": 30.0,
+      "weight": 30.0,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n7",
+      "target": "n6",
+      "distance_px": 44.911,
+      "weight": 44.911,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n7",
+      "target": "n8",
+      "distance_px": 26.907,
+      "weight": 26.907,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n8",
+      "target": "n17",
+      "distance_px": 46.098,
+      "weight": 46.098,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n17",
+      "target": "n9",
+      "distance_px": 49.092,
+      "weight": 49.092,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n28",
+      "target": "n17",
+      "distance_px": 38.328,
+      "weight": 38.328,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n16",
+      "target": "n28",
+      "distance_px": 118.714,
+      "weight": 118.714,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n30",
+      "target": "n19",
+      "distance_px": 65.104,
+      "weight": 65.104,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n18",
+      "target": "n3",
+      "distance_px": 42.19,
+      "weight": 42.19,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n31",
+      "target": "n13",
+      "distance_px": 14.116,
+      "weight": 14.116,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n11",
+      "target": "n31",
+      "distance_px": 19.007,
+      "weight": 19.007,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n31",
+      "target": "n12",
+      "distance_px": 15.207,
+      "weight": 15.207,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n5",
+      "target": "n32",
+      "distance_px": 44.688,
+      "weight": 44.688,
+      "weight_unit": "pixels",
+      "peak_delay": 0.0
+    },
+    {
+      "source": "n32",
+      "target": "n22",
+      "distance_px": 47.927,
+      "weight": 47.927,
+      "weight_unit": "pixels",
       "peak_delay": 0.0
     }
-  ]
+  ],
+  "directed": false
 }
